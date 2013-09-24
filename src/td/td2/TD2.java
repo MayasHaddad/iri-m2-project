@@ -182,7 +182,19 @@ public class TD2 {
 		return hits;
 	}
 	
-	
+	public static HashMap<String, Double> getTfIdf(String fileName, HashMap<String, Integer> dfs,
+			int documentNumber, Normalizer normalizer, boolean removeStopWords) throws IOException{
+		HashMap<String, Double> tfIdfs = new HashMap<String, Double>();
+		for(Map.Entry<String,Integer> entry : getTermFrequencies(fileName, normalizer, removeStopWords).entrySet()){
+			String word = entry.getKey();
+			Integer tf = entry.getValue();
+			Double idf = Math.log(documentNumber/dfs.get(word));
+			Double tfIdf = tf * idf;
+			System.out.println(word + "\t" + tfIdf);
+			tfIdfs.put(word, tfIdf);
+		}
+		return tfIdfs;
+	}
 	/**
 	 * Main, appels de toutes les méthodes des exercices du TD1. 
 	 * @param args
@@ -193,10 +205,11 @@ public class TD2 {
 			//stemming(FILENAME);
 			Normalizer stemmer = new FrenchStemmer();
 			Normalizer tokenizer = new FrenchTokenizer();
-			Normalizer[] normalizers = {tokenizer, stemmer};
+			Normalizer[] normalizers = {tokenizer};
 			for (Normalizer normalizer : normalizers) {
 				//getTermFrequencies(FILENAME, normalizer, true);
-				getDocumentFrequency(DIRNAME, normalizer, false);
+				HashMap<String, Integer> dfs = getDocumentFrequency(DIRNAME, normalizer, false);
+				getTfIdf(FILENAME, dfs, 107, normalizer, true);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
