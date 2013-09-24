@@ -102,9 +102,7 @@ public class TD1 {
 			
 			// TODO !
 			Integer number;
-			ArrayList<String> alreadySeenInTheCurrentFile = new ArrayList<String>();
 			for (String fileName : fileNames) {
-				alreadySeenInTheCurrentFile.clear();
 				System.err.println("Analyse du fichier " + fileName);
 				// Appel de la méthode de normalisation
 				ArrayList<String> words = normalizer.normalize(new File(dirName + File.separator + fileName));
@@ -121,11 +119,8 @@ public class TD1 {
 					}
 					// Sinon, on incrémente le nombre d'occurrence
 					else {
-						if(!alreadySeenInTheCurrentFile.contains(wordLC)){
 							hits.put(wordLC, ++number);
-						}
 					}
-					alreadySeenInTheCurrentFile.add(wordLC);
 				}
 			}
 		}
