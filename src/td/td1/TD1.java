@@ -34,7 +34,7 @@ public class TD1 {
 	 */
 	private static void stemming(String fileName) throws IOException {
 		// TODO !
-		ArrayList<String> words = (new FrenchStemmer()).normalize((new File(fileName)));
+		ArrayList<String> words = (new FrenchStemmer()).normalize(fileName, true);
 		System.out.println(words);
 	}
 	
@@ -145,13 +145,13 @@ public class TD1 {
 	public static void main(String[] args) {
 		// TODO !
 		try {
-			//stemming(FILENAME);
+			stemming(FILENAME);
 			Normalizer stemmer = new FrenchStemmer();
 			Normalizer tokenizer = new FrenchTokenizer();
 			Normalizer[] normalizers = {tokenizer, stemmer};
 			for (Normalizer normalizer : normalizers) {
 				//getTermFrequencies(FILENAME, normalizer);
-				getCollectionFrequency(DIRNAME, normalizer);
+				//getCollectionFrequency(DIRNAME, normalizer);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

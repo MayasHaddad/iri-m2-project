@@ -58,7 +58,59 @@ public class FrenchStemmer extends org.tartarus.snowball.ext.frenchStemmer imple
 		ArrayList<String> words = (new FrenchTokenizer()).tokenize(text.toLowerCase());
 		return words;
 	}
-
+	
+	public ArrayList<String> normalize(String fileName, boolean removeStopWords)
+			throws IOException{
+		ArrayList<String> result = new ArrayList<String>();
+		File file = new File(fileName);
+		
+		ArrayList<String> stopWords = new ArrayList<String>();
+		if(removeStopWords == true){
+			stopWords = getStopWords();
+		}
+		String text = "";
+		//lecture du fichier texte	
+		InputStream ips=new FileInputStream(file); 
+		InputStreamReader ipsr=new InputStreamReader(ips);
+		BufferedReader br=new BufferedReader(ipsr);
+		String line;
+		while ((line=br.readLine())!=null){
+			text += line + " ";
+		}
+		br.close(); 
+		
+		ArrayList<String> words = (new FrenchTokenizer()).tokenize(text.toLowerCase());
+		for (String word : words) {
+			
+			if(removeStopWords == true && stopWords.contains(word)){
+				//System.out.println(word);
+				continue;
+			}else{
+				
+				this.setCurrent(word);
+				for (int i = REPEAT; i != 0; i--) {
+					this.stem();
+				}
+				result.add(this.getCurrent());
+			}
+		}
+		return result;
+	}
+	
+	public static ArrayList<String> getStopWords() throws IOException{
+		ArrayList<String> stopWords = new ArrayList<String>();
+		File file = new File("/net/k3/u/etudiant/mhadda1/IRI/stop-words.txt");
+		InputStream ips=new FileInputStream(file); 
+		InputStreamReader ipsr=new InputStreamReader(ips);
+		BufferedReader br=new BufferedReader(ipsr);
+		String line;
+		while ((line=br.readLine())!=null){
+			stopWords.add(line);
+		}
+		br.close(); 
+		return stopWords;
+	}
+	
 	public static void main(String[] args) {
 	}
 }

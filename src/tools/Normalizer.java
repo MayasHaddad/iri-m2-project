@@ -26,5 +26,16 @@ public interface Normalizer {
 	 * @return
 	 */
 	public ArrayList<String> normalize(String text);
-
+	
+	/**
+	 * Renvoie la liste d'unités lexicales contenus dans le fichier
+	 * spécifié, en appliquant une normalisation. Equivaut à {@code normalize(text, false)}.
+	 * avec suppression ou pas de mots vides
+	 * @param fileName
+	 * @param removeStopWords
+	 * @return
+	 * @throws IOException
+	 */
+	public ArrayList<String> normalize(String fileName, boolean removeStopWords)
+			throws IOException;
 }
