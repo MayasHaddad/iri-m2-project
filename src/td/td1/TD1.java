@@ -20,7 +20,7 @@ public class TD1 {
 	 * Le répertoire du corpus
 	 */
 	// CHEMIN A CHANGER si nécessaire
-	private static String DIRNAME = "/net/public/iri/lemonde/";
+	private static String DIRNAME = "/net/k14/u/enseignant/tannier/iri/lemonde/";
 	/**
 	 * Un fichier de ce répertoire
 	 */
@@ -71,11 +71,12 @@ public class TD1 {
 				hits.put(word, ++number);
 			}
 		}
-		return hits;
+
 //		// Affichage du résultat
-//		for (Map.Entry<String, Integer> hit : hits.entrySet()) {
-//			System.out.println(hit.getKey() + "\t" + hit.getValue());
-//		}
+		for (Map.Entry<String, Integer> hit : hits.entrySet()) {
+			System.out.println(hit.getKey() + "\t" + hit.getValue());
+		}
+		return hits;
 	}
 	
 	
@@ -86,7 +87,7 @@ public class TD1 {
 	 * @param normalizer la classe de normalisation utilisée
 	 * @throws IOException
 	 */
-	private static void getCollectionFrequency(String dirName, Normalizer normalizer) throws IOException {
+	private static HashMap<String, Integer> getCollectionFrequency(String dirName, Normalizer normalizer) throws IOException {
 		// Création de la table des mots
 		HashMap<String, Integer> hits = new HashMap<String, Integer>();
 		File dir = new File(dirName);
@@ -101,11 +102,12 @@ public class TD1 {
 			
 			// TODO !
 			Integer number;
+			ArrayList<String> alreadySeenInTheCurrentFile = new ArrayList<String>();
 			for (String fileName : fileNames) {
+				alreadySeenInTheCurrentFile.clear();
 				System.err.println("Analyse du fichier " + fileName);
 				// Appel de la méthode de normalisation
-				ArrayList<String> words = normalizer.normalize(dirName + File.separator + fileName);
-
+				ArrayList<String> words = normalizer.normalize(new File(dirName + File.separator + fileName));
 				// Pour chaque mot de la liste, on remplit un dictionnaire
 				// du nombre d'occurrences pour ce mot
 				for (String word : words) {
@@ -119,8 +121,11 @@ public class TD1 {
 					}
 					// Sinon, on incrémente le nombre d'occurrence
 					else {
-						hits.put(wordLC, ++number);
+						if(!alreadySeenInTheCurrentFile.contains(wordLC)){
+							hits.put(wordLC, ++number);
+						}
 					}
+					alreadySeenInTheCurrentFile.add(wordLC);
 				}
 			}
 		}
@@ -129,6 +134,7 @@ public class TD1 {
 		for (Map.Entry<String, Integer> hit : hits.entrySet()) {
 			System.out.println(hit.getKey() + "\t" + hit.getValue());
 		}
+		return hits;
 	}
 	
 	
@@ -139,12 +145,12 @@ public class TD1 {
 	public static void main(String[] args) {
 		// TODO !
 		try {
-			stemming(FILENAME);
+			//stemming(FILENAME);
 			Normalizer stemmer = new FrenchStemmer();
 			Normalizer tokenizer = new FrenchTokenizer();
 			Normalizer[] normalizers = {tokenizer, stemmer};
 			for (Normalizer normalizer : normalizers) {
-				getTermFrequencies(FILENAME, normalizer);
+				//getTermFrequencies(FILENAME, normalizer);
 				getCollectionFrequency(DIRNAME, normalizer);
 			}
 		} catch (IOException e) {
