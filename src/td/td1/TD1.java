@@ -34,7 +34,7 @@ public class TD1 {
 	 */
 	private static void stemming(String fileName) throws IOException {
 		// TODO !
-		ArrayList<String> words = (new FrenchTokenizer()).normalize(fileName, true);
+		ArrayList<String> words = (new FrenchStemmer()).normalize(new File(fileName));
 		System.out.println(words);
 	}
 	
@@ -47,13 +47,13 @@ public class TD1 {
 	 * @param normalizer la classe de normalisation utilisée
 	 * @throws IOException
 	 */
-	public static HashMap<String, Integer>  getTermFrequencies(String fileName, Normalizer normalizer) throws IOException {
+	public static HashMap<String, Integer>  getTermFrequencies(String fileName, Normalizer normalizer, boolean removeStopWords) throws IOException {
 		// Création de la table des mots
 		HashMap<String, Integer> hits = new HashMap<String, Integer>();
 		
 		// TODO !
 		// Appel de la méthode de normalisation
-		ArrayList<String> words = normalizer.normalize((new File(fileName)));
+		ArrayList<String> words = normalizer.normalize(fileName, removeStopWords);
 		Integer number;
 		// Pour chaque mot de la liste, on remplit un dictionnaire
 		// du nombre d'occurrences pour ce mot
@@ -145,13 +145,13 @@ public class TD1 {
 	public static void main(String[] args) {
 		// TODO !
 		try {
-			stemming(FILENAME);
+			//stemming(FILENAME);
 			Normalizer stemmer = new FrenchStemmer();
 			Normalizer tokenizer = new FrenchTokenizer();
 			Normalizer[] normalizers = {tokenizer, stemmer};
 			for (Normalizer normalizer : normalizers) {
-				//getTermFrequencies(FILENAME, normalizer);
-				//getCollectionFrequency(DIRNAME, normalizer);
+				getTermFrequencies(FILENAME, normalizer, true);
+				getCollectionFrequency(DIRNAME, normalizer);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
