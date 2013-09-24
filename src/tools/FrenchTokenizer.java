@@ -96,7 +96,29 @@ public class FrenchTokenizer implements Normalizer {
 		return this.tokenize(text);
 	}
 	
-
+	public ArrayList<String> normalize(String fileName, boolean removeStopWords)
+			throws IOException{
+		String text = "";
+		File file = new File(fileName);
+		ArrayList<String> result = new ArrayList<String>();
+		//lecture du fichier texte	
+		InputStream ips=new FileInputStream(file); 
+		InputStreamReader ipsr=new InputStreamReader(ips);
+		BufferedReader br=new BufferedReader(ipsr);
+		String line;
+		while ((line=br.readLine())!=null){
+			text += line + " ";
+		}
+		br.close();
+		result = this.tokenize(text.toLowerCase());
+		if(removeStopWords == false){	
+			return result;
+		}
+		ArrayList<String> stopWords = FrenchStemmer.getStopWords();
+		result.removeAll(stopWords);
+		return result;
+		
+	}
 	public static void main(String[] args) {
 
 	}

@@ -34,7 +34,7 @@ public class TD1 {
 	 */
 	private static void stemming(String fileName) throws IOException {
 		// TODO !
-		ArrayList<String> words = (new FrenchStemmer()).normalize(fileName, true);
+		ArrayList<String> words = (new FrenchTokenizer()).normalize(fileName, true);
 		System.out.println(words);
 	}
 	
