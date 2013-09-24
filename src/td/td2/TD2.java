@@ -2,6 +2,7 @@ package td.td2;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -195,6 +196,29 @@ public class TD2 {
 		}
 		return tfIdfs;
 	}
+	
+	public static void getWeightFiles(String inDirName, String outDirName, Normalizer normalizer,
+			boolean removeStopWords) throws IOException{
+		File dir = new File(inDirName);
+		if (dir.isDirectory()) {
+			String [] fileNames= dir.list();
+			int numberDocuments = fileNames.length;
+			HashMap<String, Integer> dfs = getDocumentFrequency(inDirName, normalizer, removeStopWords);
+			for(String file : fileNames){
+				HashMap<String, Double> tfidfs = getTfIdf(inDirName + file, dfs, numberDocuments, normalizer, true);
+
+				PrintWriter writer = new PrintWriter(outDirName + "/" + file + ".poids", "UTF-8");
+				
+				for (Map.Entry<String, Double> tfidf : tfidfs.entrySet()) {
+						writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
+				}
+						
+				writer.println("The second line");
+				writer.close();
+			}
+		}
+	}
+	
 	/**
 	 * Main, appels de toutes les méthodes des exercices du TD1. 
 	 * @param args
@@ -208,8 +232,9 @@ public class TD2 {
 			Normalizer[] normalizers = {tokenizer};
 			for (Normalizer normalizer : normalizers) {
 				//getTermFrequencies(FILENAME, normalizer, true);
-				HashMap<String, Integer> dfs = getDocumentFrequency(DIRNAME, normalizer, false);
-				getTfIdf(FILENAME, dfs, 107, normalizer, true);
+				//HashMap<String, Integer> dfs = getDocumentFrequency(DIRNAME, normalizer, false);
+				//getTfIdf(FILENAME, dfs, 107, normalizer, true);
+				getWeightFiles(DIRNAME, "/net/k3/u/etudiant/mhadda1/IRI/weights", normalizer, true);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
