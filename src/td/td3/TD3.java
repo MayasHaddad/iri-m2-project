@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import tools.FrenchStemmer;
 import tools.FrenchTokenizer;
@@ -208,8 +209,6 @@ public class TD3 {
 				for (Map.Entry<String, Double> tfidf : tfidfs.entrySet()) {
 					writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
 				}
-
-				writer.println("The second line");
 				writer.close();
 			}
 		}
@@ -265,6 +264,19 @@ public class TD3 {
 		}
 		return invertedFileTreeMap;
 	}
+	
+	/*
+	 * TreeSet remplacé par ArrayList (Sous réserve, prof)
+	 */
+	public static void saveInvertedFile(TreeMap<String, ArrayList<String>> invertedFile, File outFile)
+			throws IOException{
+		PrintWriter writer = new PrintWriter(outFile + ".inverted", "UTF-8");
+
+		for (Map.Entry<String, ArrayList<String>> line : invertedFile.entrySet()) {
+			writer.println(line.getKey() + "\t" + line.getValue().size() + "\t" + line.getValue());
+		}
+		writer.close();
+	}
 	/**
 	 * Main, appels de toutes les mÃ©thodes des exercices du TD1. 
 	 * @param args
@@ -281,7 +293,8 @@ public class TD3 {
 				//HashMap<String, Integer> dfs = getDocumentFrequency(DIRNAME, normalizer, false);
 				//getTfIdf(FILENAME, dfs, 107, normalizer, true);
 				//getWeightFiles(DIRNAME, "/net/k3/u/etudiant/mhadda1/IRI/weights", normalizer, true);
-				System.out.println(getInvertedFile(DIRNAME, normalizer, true));
+				//System.out.println(getInvertedFile(DIRNAME, normalizer, true));
+				saveInvertedFile(getInvertedFile(DIRNAME, normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile.txt")));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
