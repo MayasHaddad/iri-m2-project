@@ -1,7 +1,11 @@
 package td.td3;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -315,6 +319,79 @@ public class TD3 {
 		return invertedFileWithWeightsMap;
 	}
 	
+	public static void mergeInvertedFiles(File invertedFile1, File invertedFile2,
+			File mergedInvertedFile) throws IOException {
+		
+		PrintWriter writer = new PrintWriter(mergedInvertedFile + ".inverted.merged", "UTF-8");
+		
+		InputStream ipsInvertedFile1 = new FileInputStream(invertedFile1); 
+		InputStream ipsInvertedFile2 = new FileInputStream(invertedFile2); 
+		
+		InputStreamReader ipsrInvertedFile1 = new InputStreamReader(ipsInvertedFile1);
+		InputStreamReader ipsrInvertedFile2 = new InputStreamReader(ipsInvertedFile2);
+		
+		BufferedReader brInvertedFile1 = new BufferedReader(ipsrInvertedFile1);
+		BufferedReader brInvertedFile2 = new BufferedReader(ipsrInvertedFile2);
+		
+		String lineInvertedFile1 = brInvertedFile1.readLine();
+		String lineInvertedFile2 = brInvertedFile2.readLine();
+		
+		String wordInvertedFile1 = new String();
+		String wordInvertedFile2 = new String();
+		
+		while (lineInvertedFile1 != null  && lineInvertedFile2 != null){
+			
+			wordInvertedFile1 = lineInvertedFile1.split(new String("\t"))[0];
+			wordInvertedFile2 = lineInvertedFile2.split(new String("\t"))[0];
+			String outputLine = new String();
+			if (wordInvertedFile1.equals(wordInvertedFile2)){
+				
+				Integer sumOfDfs = new Integer(lineInvertedFile1.split(new String("\t"))[1]);
+				sumOfDfs += new Integer(lineInvertedFile2.split(new String("\t"))[1]);
+				String firstListOfFiles = lineInvertedFile1.split(new String("\t"))[2];
+				String secondListOfFiles = lineInvertedFile2.split(new String("\t"))[2];
+				firstListOfFiles = firstListOfFiles.replace("[","");
+				firstListOfFiles = firstListOfFiles.replace("]","");
+				secondListOfFiles = secondListOfFiles.replace("[","");
+				secondListOfFiles = secondListOfFiles.replace("]","");
+				
+				String listOfFiles = firstListOfFiles + "," + secondListOfFiles;
+				outputLine = wordInvertedFile1 + "\t" + sumOfDfs + "\t[" + listOfFiles + "]";
+				
+				lineInvertedFile1 = brInvertedFile1.readLine();
+				lineInvertedFile2 = brInvertedFile2.readLine();
+			}
+			
+			if(wordInvertedFile1.compareTo(wordInvertedFile2) < 0){
+				outputLine = lineInvertedFile1;
+				lineInvertedFile1 = brInvertedFile1.readLine();
+			}
+			
+			if(wordInvertedFile1.compareTo(wordInvertedFile2) > 0){
+				outputLine = lineInvertedFile2;
+				lineInvertedFile2 = brInvertedFile2.readLine();
+			}
+			writer.println(outputLine);
+		}
+		
+		if(lineInvertedFile1 == null){
+			while(lineInvertedFile2 != null){
+				writer.println(lineInvertedFile2);
+				lineInvertedFile2 = brInvertedFile2.readLine();
+			}
+		}else{
+				if(lineInvertedFile2 == null){
+					while(lineInvertedFile1 != null){
+						writer.println(lineInvertedFile1);
+						lineInvertedFile1 = brInvertedFile1.readLine();
+					}
+			}
+		}
+		brInvertedFile1.close();
+		brInvertedFile2.close();
+		writer.close();
+		
+	}
 	/**
 	 * Main, appels de toutes les méthodes des exercices du TD1. 
 	 * @param args
@@ -333,7 +410,12 @@ public class TD3 {
 				//getWeightFiles(DIRNAME, "/net/k3/u/etudiant/mhadda1/IRI/weights", normalizer, true);
 				//System.out.println(getInvertedFile(DIRNAME, normalizer, true));
 				//saveInvertedFile(getInvertedFile(DIRNAME, normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile.txt")));
-				System.out.println(getInvertedFileWithWeights(DIRNAME, normalizer, true));
+				//System.out.println(getInvertedFileWithWeights(DIRNAME, normalizer, true));
+				saveInvertedFile(getInvertedFile("/net/k14/u/enseignant/tannier/iri/lemonde-sub1/", normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_1.txt")));
+				saveInvertedFile(getInvertedFile("/net/k14/u/enseignant/tannier/iri/lemonde-sub2/", normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_2.txt")));
+				mergeInvertedFiles(new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_1.txt.inverted"), 
+						new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_2.txt.inverted"), 
+						new File("/net/k3/u/etudiant/mhadda1/IRI/mergedInvertedFile.txt"));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
