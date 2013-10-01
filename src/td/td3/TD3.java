@@ -51,6 +51,7 @@ public class TD3 {
 
 		// TODO !
 		// Appel de la méthode de normalisation
+		System.out.println(fileName);
 		ArrayList<String> words = normalizer.normalize(fileName, removeStopWords);
 		Integer number;
 		// Pour chaque mot de la liste, on remplit un dictionnaire
@@ -175,7 +176,7 @@ public class TD3 {
 
 		// Affichage du résultat (avec la fréquence)	
 		for (Map.Entry<String, Integer> hit : hits.entrySet()) {
-			System.out.println(hit.getKey() + "\t" + hit.getValue());
+		//	System.out.println(hit.getKey() + "\t" + hit.getValue());
 		}
 		return hits;
 	}
@@ -207,7 +208,7 @@ public class TD3 {
 				PrintWriter writer = new PrintWriter(outDirName + "/" + file + ".poids", "UTF-8");
 
 				for (Map.Entry<String, Double> tfidf : tfidfs.entrySet()) {
-					writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
+			//		writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
 				}
 				writer.close();
 			}
@@ -277,6 +278,43 @@ public class TD3 {
 		}
 		writer.close();
 	}
+	
+	/*
+	 * Question 3
+	 */
+	
+	public static TreeMap<String, TreeMap<String, Double>> getInvertedFileWithWeights(
+			String dirName, Normalizer normalizer, boolean removeStopWords) throws IOException{
+		
+		//TreeMap<String, ArrayList<String>> invertedFile = getInvertedFile(DIRNAME, normalizer, removeStopWords);
+		
+		TreeMap<String, TreeMap<String, Double>> invertedFileWithWeightsMap = new TreeMap<String, TreeMap<String, Double>>();
+		
+		HashMap<String, Integer> dfs = getDocumentFrequency(dirName, normalizer, removeStopWords);
+		
+		File dir = new File(dirName);
+		
+		if (dir.isDirectory()) {
+			String[] fileNames = dir.list();
+			for (String fileName : fileNames) {
+				for(Map.Entry<String, Double> tfIdfEntry : getTfIdf(dirName + "/" + fileName, dfs, 107, normalizer, removeStopWords).entrySet()){
+					TreeMap<String, Double> myNewFileNameWeightTreeMap = new TreeMap<String, Double>();
+					
+					if(invertedFileWithWeightsMap.get(tfIdfEntry.getKey()) == null){
+						myNewFileNameWeightTreeMap.put(fileName, tfIdfEntry.getValue());
+					}else{
+						
+						myNewFileNameWeightTreeMap = invertedFileWithWeightsMap.get(tfIdfEntry.getKey());
+						myNewFileNameWeightTreeMap.put(fileName, tfIdfEntry.getValue());
+					}
+					System.out.println(myNewFileNameWeightTreeMap);
+					invertedFileWithWeightsMap.put(tfIdfEntry.getKey(), myNewFileNameWeightTreeMap);
+				}
+			}
+		}
+		return invertedFileWithWeightsMap;
+	}
+	
 	/**
 	 * Main, appels de toutes les méthodes des exercices du TD1. 
 	 * @param args
@@ -294,7 +332,8 @@ public class TD3 {
 				//getTfIdf(FILENAME, dfs, 107, normalizer, true);
 				//getWeightFiles(DIRNAME, "/net/k3/u/etudiant/mhadda1/IRI/weights", normalizer, true);
 				//System.out.println(getInvertedFile(DIRNAME, normalizer, true));
-				saveInvertedFile(getInvertedFile(DIRNAME, normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile.txt")));
+				//saveInvertedFile(getInvertedFile(DIRNAME, normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile.txt")));
+				System.out.println(getInvertedFileWithWeights(DIRNAME, normalizer, true));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
