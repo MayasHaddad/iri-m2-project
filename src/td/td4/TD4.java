@@ -1,4 +1,4 @@
-package td.td3;
+package td.td4;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,7 +17,7 @@ import tools.FrenchStemmer;
 import tools.FrenchTokenizer;
 import tools.Normalizer;
 
-public class TD3 {
+public class TD4 {
 	/**
 	 * Le répertoire du corpus
 	 */
@@ -37,7 +37,7 @@ public class TD3 {
 	private static void stemming(String fileName) throws IOException {
 		// TODO !
 		ArrayList<String> words = (new FrenchStemmer()).normalize(new File(fileName));
-		System.out.println(words);
+		//System.out.println(words);
 	}
 
 
@@ -55,7 +55,7 @@ public class TD3 {
 
 		// TODO !
 		// Appel de la méthode de normalisation
-		System.out.println(fileName);
+		//System.out.println(fileName);
 		ArrayList<String> words = normalizer.normalize(fileName, removeStopWords);
 		Integer number;
 		// Pour chaque mot de la liste, on remplit un dictionnaire
@@ -77,7 +77,7 @@ public class TD3 {
 
 		//		// Affichage du résultat
 		for (Map.Entry<String, Integer> hit : hits.entrySet()) {
-			System.out.println(hit.getKey() + "\t" + hit.getValue());
+			//System.out.println(hit.getKey() + "\t" + hit.getValue());
 		}
 		return hits;
 	}
@@ -104,7 +104,7 @@ public class TD3 {
 			// TODO !
 			Integer number;
 			for (String fileName : fileNames) {
-				System.err.println("Analyse du fichier " + fileName);
+				//System.err.println("Analyse du fichier " + fileName);
 				// Appel de la méthode de normalisation
 				ArrayList<String> words = normalizer.normalize(new File(dirName + File.separator + fileName));
 				// Pour chaque mot de la liste, on remplit un dictionnaire
@@ -153,7 +153,7 @@ public class TD3 {
 			ArrayList<String> alreadySeenInTheCurrentFile = new ArrayList<String>();
 			for (String fileName : fileNames) {
 				alreadySeenInTheCurrentFile.clear();
-				System.err.println("Analyse du fichier " + fileName);
+				//System.err.println("Analyse du fichier " + fileName);
 				// Appel de la méthode de normalisation
 				ArrayList<String> words = normalizer.normalize(dirName + File.separator + fileName, removeStopWords);
 				// Pour chaque mot de la liste, on remplit un dictionnaire
@@ -185,15 +185,15 @@ public class TD3 {
 		return hits;
 	}
 
-	public static HashMap<String, Double> getTfIdf(String fileName, HashMap<String, Integer> dfs,
+	public static TreeMap<String, Double> getTfIdf(String fileName, HashMap<String, Integer> dfs,
 			int documentNumber, Normalizer normalizer, boolean removeStopWords) throws IOException{
-		HashMap<String, Double> tfIdfs = new HashMap<String, Double>();
+		TreeMap<String, Double> tfIdfs = new TreeMap<String, Double>();
 		for(Map.Entry<String,Integer> entry : getTermFrequencies(fileName, normalizer, removeStopWords).entrySet()){
 			String word = entry.getKey();
 			Integer tf = entry.getValue();
 			Double idf = Math.log(documentNumber/dfs.get(word));
 			Double tfIdf = tf * idf;
-			System.out.println(word + "\t" + tfIdf);
+			//System.out.println(word + "\t" + tfIdf);
 			tfIdfs.put(word, tfIdf);
 		}
 		return tfIdfs;
@@ -202,17 +202,18 @@ public class TD3 {
 	public static void getWeightFiles(String inDirName, String outDirName, Normalizer normalizer,
 			boolean removeStopWords) throws IOException{
 		File dir = new File(inDirName);
+
 		if (dir.isDirectory()) {
 			String [] fileNames= dir.list();
 			int numberDocuments = fileNames.length;
 			HashMap<String, Integer> dfs = getDocumentFrequency(inDirName, normalizer, removeStopWords);
 			for(String file : fileNames){
-				HashMap<String, Double> tfidfs = getTfIdf(inDirName + file, dfs, numberDocuments, normalizer, true);
+				TreeMap<String, Double> tfidfs = getTfIdf(inDirName + file, dfs, numberDocuments, normalizer, true);
 
 				PrintWriter writer = new PrintWriter(outDirName + "/" + file + ".poids", "UTF-8");
 
 				for (Map.Entry<String, Double> tfidf : tfidfs.entrySet()) {
-					//		writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
+					writer.println(tfidf.getKey() + "\t" + tfidf.getValue());
 				}
 				writer.close();
 			}
@@ -404,9 +405,109 @@ public class TD3 {
 		brInvertedFile1.close();
 		brInvertedFile2.close();
 		writer.close();
-
-
 	}
+
+	public static double getSimilarity(String fileName1, String fileName2) throws IOException {
+
+		double similarity = 0.0;
+		double sumOfProductOfBothWeights = 0.0;
+		double sumOfSquaredWeights1 = 0.0;
+		double sumOfSquaredWeights2 = 0.0;
+		File weightFile1 = new File(fileName1);
+		File weightFile2 = new File(fileName2);
+
+		InputStream ipsWeightFile1 = new FileInputStream(weightFile1);
+		InputStream ipsWeightFile2 = new FileInputStream(weightFile2);
+
+		InputStreamReader ipsrWeightFile1 = new InputStreamReader(ipsWeightFile1);
+		InputStreamReader ipsrWeightFile2 = new InputStreamReader(ipsWeightFile2);
+
+		BufferedReader brWeightFile1 = new BufferedReader(ipsrWeightFile1);
+		BufferedReader brWeightFile2 = new BufferedReader(ipsrWeightFile2);
+
+		String lineWeightFile1 = brWeightFile1.readLine();
+		String lineWeightFile2 = brWeightFile2.readLine();
+
+		String wordWeightFile1 = new String();
+		String wordWeightFile2 = new String();
+
+		while (lineWeightFile1 != null && lineWeightFile2 != null){
+			
+			wordWeightFile1 = lineWeightFile1.split(new String("\t"))[0];
+			wordWeightFile2 = lineWeightFile2.split(new String("\t"))[0];
+			Double weight1 = Double.parseDouble(lineWeightFile1.split(new String("\t"))[1]);
+			Double weight2 = Double.parseDouble(lineWeightFile2.split(new String("\t"))[1]);
+
+			if (wordWeightFile1.equals(wordWeightFile2)){
+
+				sumOfProductOfBothWeights += weight1 * weight2;
+				sumOfSquaredWeights1 += weight1 * weight1;
+				sumOfSquaredWeights2 += weight2 * weight2;
+				lineWeightFile2 = brWeightFile2.readLine();
+				lineWeightFile1 = brWeightFile1.readLine();
+			}else{
+				if(wordWeightFile1.compareTo(wordWeightFile2) > 0){
+					sumOfSquaredWeights2 += weight2 * weight2;
+					lineWeightFile2 = brWeightFile2.readLine();
+				}else{
+					sumOfSquaredWeights1 += weight1 * weight1;
+					lineWeightFile1 = brWeightFile1.readLine();
+				}
+			}
+		}
+		while (lineWeightFile1 != null){
+			sumOfSquaredWeights1 += 
+					Double.parseDouble(lineWeightFile1.split(new String("\t"))[1]) * 
+					Double.parseDouble(lineWeightFile1.split(new String("\t"))[1])
+					;
+			lineWeightFile1 = brWeightFile1.readLine();
+		}
+		while (lineWeightFile2 != null){
+			sumOfSquaredWeights2 += 
+					Double.parseDouble(lineWeightFile2.split(new String("\t"))[1]) * 
+					Double.parseDouble(lineWeightFile2.split(new String("\t"))[1])
+					;
+			lineWeightFile2 = brWeightFile2.readLine();
+		}
+		similarity = sumOfProductOfBothWeights / 
+				(Math.sqrt(sumOfSquaredWeights1) * Math.sqrt(sumOfSquaredWeights2))
+				;
+		return similarity;
+	}
+	
+	public static void getSimilarDocuments(String fileName, String[] fileList) throws IOException {
+		
+		String localDir = "/net/k3/u/etudiant/mhadda1/IRI/weights/";
+		
+		TreeMap<Double, TreeSet<String>> filesBySimilarity = new TreeMap<Double, TreeSet<String>>();
+		for(String currentFileName : fileList){
+			Double currentSimilarity = getSimilarity(fileName, localDir + currentFileName);
+			if(filesBySimilarity.get(currentSimilarity) != null){
+				filesBySimilarity.get(currentSimilarity).add(currentFileName);
+				filesBySimilarity.put(currentSimilarity, 
+						filesBySimilarity.get(currentSimilarity));
+			}else{
+				TreeSet<String> listOfFiles = new TreeSet<String>();
+				listOfFiles.add(currentFileName);
+				filesBySimilarity.put(currentSimilarity, listOfFiles);
+			}
+		}
+		
+		Map.Entry<Double, TreeSet<String>> element = filesBySimilarity.lastEntry();
+		
+		while(element != null){
+			if(element.getValue().size() > 1 ){
+				for(String currentFileName : element.getValue()){
+					System.out.println(currentFileName + "\t" + element.getKey());
+				}
+			}else{
+				System.out.println(element.getValue().first() + "\t" + element.getKey());
+			}
+			filesBySimilarity.remove(element.getKey());
+			element = filesBySimilarity.lastEntry();
+		}
+	}
+	
 	/**
 	 * Main, appels de toutes les méthodes des exercices du TD1. 
 	 * @param args
@@ -430,13 +531,22 @@ public class TD3 {
 
 				// Deuxeme partie : Fusion des indexes
 				// Q1 
-				saveInvertedFile(getInvertedFile("/net/k14/u/enseignant/tannier/iri/lemonde-sub1/", normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_1.txt")));
+				/*saveInvertedFile(getInvertedFile("/net/k14/u/enseignant/tannier/iri/lemonde-sub1/", normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_1.txt")));
 				saveInvertedFile(getInvertedFile("/net/k14/u/enseignant/tannier/iri/lemonde-sub2/", normalizer, true), (new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_2.txt")));
 				// Q2
 				mergeInvertedFiles(new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_1.txt.inverted"), 
 						new File("/net/k3/u/etudiant/mhadda1/IRI/invertedFile_2.txt.inverted"), 
 						new File("/net/k3/u/etudiant/mhadda1/IRI/mergedInvertedFile.txt"));
 				// Q3 : appeler le programme diff avec fichier inverse 1 et fichier inverse 2 en parametres
+				 */
+				//getWeightFiles(DIRNAME, "/net/k3/u/etudiant/mhadda1/IRI/weights/", normalizer, true);
+				//System.out.println(getSimilarity("/net/k3/u/etudiant/mhadda1/IRI/weights/texte.95-10.txt.poids",
+				//		"/net/k3/u/etudiant/mhadda1/IRI/weights/texte.95-10.txt.poids"));
+				File dir = new File("/net/k3/u/etudiant/mhadda1/IRI/weights/");
+
+				if (dir.isDirectory()) {
+					getSimilarDocuments("/net/k3/u/etudiant/mhadda1/IRI/weights/texte.95-1.txt.poids", dir.list());	
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
